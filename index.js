@@ -9,8 +9,7 @@
 
 'use strict';
 
-var Characteristic, Service, FakeGatoHistoryService, FakeGatoHistorySetting;
-var inherits = require('util').inherits;
+var Characteristic, Service, Formats, Perms, FakeGatoHistoryService, FakeGatoHistorySetting;
 
 var ValueGetter = require('./src/helper/value-getter.js');
 var request  = require('request');
@@ -20,6 +19,19 @@ var Powerwall, PowerMeter, PowerMeterLineGraph, GridStatus;
 module.exports = function(homebridge) {
     Service                = homebridge.hap.Service;
     Characteristic         = homebridge.hap.Characteristic;
+    Formats                = homebridge.hap.Formats || Characteristic.Formats;
+    Perms                  = homebridge.hap.Perms || Object.assign({}, Characteristic.Perms, {
+        PAIRED_READ: Characteristic.Perms.READ,
+        PAIRED_WRITE: Characteristic.Perms.WRITE
+    });
+
+    // Compatibility aliases for dependencies that still use the Homebridge 1 API.
+    Characteristic.Formats = Formats;
+    Characteristic.Perms = Object.assign({}, Perms, {
+        READ: Perms.PAIRED_READ,
+        WRITE: Perms.PAIRED_WRITE
+    });
+
     FakeGatoHistoryService = require('fakegato-history')(homebridge);
 
     homebridge.registerPlatform(
@@ -500,89 +512,100 @@ var loadEve = function() {
     //-----------------------------------------------------------------------//
     // https://github.com/simont77/fakegato-history
     
+    function customCharacteristic(displayName, uuid, props) {
+        var CustomCharacteristic = class extends Characteristic {
+            constructor() {
+                super(displayName, uuid);
+                this.setProps(props);
+                this.value = this.getDefaultValue();
+            }
+        };
+
+        CustomCharacteristic.UUID = uuid;
+        return CustomCharacteristic;
+    }
+
     // Load custom (Eve) Characteristics
-    Characteristic.CurrentPowerConsumption = function() {
-        Characteristic.call(this, 'Consumption', 'E863F10D-079E-48FF-8F27-9C2605A29F52');
-        this.setProps({
-            format: Characteristic.Formats.UINT16,
+    Characteristic.CurrentPowerConsumption = customCharacteristic(
+        'Consumption',
+        'E863F10D-079E-48FF-8F27-9C2605A29F52',
+        {
+            format: Formats.UINT16,
             unit: 'Watts',
             maxValue: 100000,
             minValue: 0,
             minStep: 1,
-            perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-        });
-        this.value = this.getDefaultValue();
-    };
-    Characteristic.CurrentPowerConsumption.UUID = 'E863F10D-079E-48FF-8F27-9C2605A29F52';
-    inherits(Characteristic.CurrentPowerConsumption, Characteristic);
+            perms: [Perms.PAIRED_READ, Perms.NOTIFY]
+        }
+    );
 
-    Characteristic.TotalConsumption = function() {
-        Characteristic.call(this, 'Energy', 'E863F10C-079E-48FF-8F27-9C2605A29F52');
-        this.setProps({
-            format: Characteristic.Formats.FLOAT,
+    Characteristic.TotalConsumption = customCharacteristic(
+        'Energy',
+        'E863F10C-079E-48FF-8F27-9C2605A29F52',
+        {
+            format: Formats.FLOAT,
             unit: 'kWh',
             maxValue: 100000000000,
             minValue: 0,
             minStep: 0.001,
-            perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-        });
-        this.value = this.getDefaultValue();
-    };
-    Characteristic.TotalConsumption.UUID = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
-    inherits(Characteristic.TotalConsumption, Characteristic);
+            perms: [Perms.PAIRED_READ, Perms.NOTIFY]
+        }
+    );
 
-    Characteristic.ResetTotal = function() {
-        Characteristic.call(this, 'Reset', 'E863F112-079E-48FF-8F27-9C2605A29F52');
-        this.setProps({
-            format: Characteristic.Formats.UINT32,
+    Characteristic.ResetTotal = customCharacteristic(
+        'Reset',
+        'E863F112-079E-48FF-8F27-9C2605A29F52',
+        {
+            format: Formats.UINT32,
             perms: [
-                Characteristic.Perms.READ, 
-                Characteristic.Perms.NOTIFY, 
-                Characteristic.Perms.WRITE]
-        });
-        this.value = this.getDefaultValue();
-    };
-    Characteristic.ResetTotal.UUID = 'E863F112-079E-48FF-8F27-9C2605A29F52';
-    inherits(Characteristic.ResetTotal, Characteristic);
+                Perms.PAIRED_READ,
+                Perms.NOTIFY,
+                Perms.PAIRED_WRITE
+            ]
+        }
+    );
 
-    Characteristic.AirPressure = function () {
-        Characteristic.call(this, 'Air Pressure', 'E863F10F-079E-48FF-8F27-9C2605A29F52');
-        this.setProps({
-            format: Characteristic.Formats.UINT16,
+    Characteristic.AirPressure = customCharacteristic(
+        'Air Pressure',
+        'E863F10F-079E-48FF-8F27-9C2605A29F52',
+        {
+            format: Formats.UINT16,
             unit: 'mBar',
             maxValue: 1100,
             minValue: 700,
             minStep: 1,
-            perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-        });
-        this.value = this.getDefaultValue();
-    };
-    inherits(Characteristic.AirPressure, Characteristic);
+            perms: [Perms.PAIRED_READ, Perms.NOTIFY]
+        }
+    );
 
     // Load custom (Eve) Services
-    Service.PowerMeterService = function(name, uuid, subtype) {
-        if (!uuid) {
-            uuid =  '00000001-0000-1777-8000-775D67EC4377';
+    Service.PowerMeterService = class extends Service {
+        constructor(name, uuid, subtype) {
+            if (!uuid) {
+                uuid = '00000001-0000-1777-8000-775D67EC4377';
+            }
+            super(name, uuid, subtype);
+            this.addCharacteristic(Characteristic.CurrentPowerConsumption);
+            this.addCharacteristic(Characteristic.TotalConsumption);
+            this.addCharacteristic(Characteristic.ResetTotal);
         }
-        Service.call(this, name, uuid, subtype);
-        this.addCharacteristic(Characteristic.CurrentPowerConsumption);
-        this.addCharacteristic(Characteristic.TotalConsumption);
-        this.addCharacteristic(Characteristic.ResetTotal);
     };
-    inherits(Service.PowerMeterService, Service);
+    Service.PowerMeterService.UUID = '00000001-0000-1777-8000-775D67EC4377';
 
-    Service.WeatherService = function (displayName, subtype) {
-        Service.call(this, displayName, 'E863F001-079E-48FF-8F27-9C2605A29F52', subtype);
-        this.addCharacteristic(Characteristic.CurrentTemperature);
-        this.addCharacteristic(Characteristic.CurrentRelativeHumidity);
-        this.addCharacteristic(Characteristic.AirPressure);
-        this.getCharacteristic(Characteristic.CurrentTemperature)
-            .setProps({
-                minValue: -40,
-                maxValue: 60
-            });
+    Service.WeatherService = class extends Service {
+        constructor(displayName, subtype) {
+            super(displayName, 'E863F001-079E-48FF-8F27-9C2605A29F52', subtype);
+            this.addCharacteristic(Characteristic.CurrentTemperature);
+            this.addCharacteristic(Characteristic.CurrentRelativeHumidity);
+            this.addCharacteristic(Characteristic.AirPressure);
+            this.getCharacteristic(Characteristic.CurrentTemperature)
+                .setProps({
+                    minValue: -40,
+                    maxValue: 60
+                });
+        }
     };
-    inherits(Service.WeatherService, Service);
+    Service.WeatherService.UUID = 'E863F001-079E-48FF-8F27-9C2605A29F52';
 };
 
 var defaultValue = function(start, listOfAttr, fallback) {

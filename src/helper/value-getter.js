@@ -54,6 +54,11 @@ ValueGetter.prototype = {
 
                         result = result[this.attributes[att]];
                     }
+
+                    if (result === undefined || result === null) {
+                        result = this.defaultValue;
+                    }
+
                     callback(null, this.manipulate(result));
                 }
             }.bind(this),

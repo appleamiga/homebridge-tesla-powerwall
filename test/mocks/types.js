@@ -2746,6 +2746,7 @@ Service.BatteryService = function(displayName, subtype) {
 inherits(Service.BatteryService, Service);
 
 Service.BatteryService.UUID = '00000096-0000-1000-8000-0026BB765291';
+Service.Battery = Service.BatteryService;
 
 /**
  * Service "Camera RTP Stream Management"

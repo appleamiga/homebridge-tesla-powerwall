@@ -65,8 +65,8 @@ Powerwall.prototype = {
         eventPolling(this.stateSwitch, Characteristic.On, this.pollingInterval);
         services.push(this.stateSwitch);
 
-        this.battery = 
-            new Service.BatteryService(this.name + ' ' + 'Battery');
+        this.battery =
+            new Service.Battery(this.name + ' ' + 'Battery');
         this.battery
             .getCharacteristic(Characteristic.BatteryLevel)
             .on('get', _createFastGetter(this.getBatteryLevel.bind(this), this.log));
