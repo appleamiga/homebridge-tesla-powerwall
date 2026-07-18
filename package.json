@@ -1,25 +1,28 @@
 {
   "name": "homebridge-tesla-powerwall",
-  "version": "3.1.0-Beta7",
-  "description": "Homebridge plugin for the Tesla Powerwall",
+  "version": "3.1.1",
+  "description": "Homebridge 2 compatible plugin for the Tesla Powerwall",
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha --exit"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/datMaffin/homebridge-tesla-powerwall.git"
+    "url": "git+https://github.com/appleamiga/homebridge-tesla-powerwall.git"
   },
   "keywords": [
     "homebridge-plugin",
     "Tesla Powerwall"
   ],
   "author": "Marvin Dostal",
+  "contributors": [
+    "appleamiga"
+  ],
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/datMaffin/homebridge-tesla-powerwall/issues"
+    "url": "https://github.com/appleamiga/homebridge-tesla-powerwall/issues"
   },
-  "homepage": "https://github.com/datMaffin/homebridge-tesla-powerwall#readme",
+  "homepage": "https://github.com/appleamiga/homebridge-tesla-powerwall#readme",
   "engines": {
     "node": ">=6.17.1",
     "homebridge": ">=0.9.0"

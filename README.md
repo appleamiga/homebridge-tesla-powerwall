@@ -1,44 +1,41 @@
-## Effectively archived
-*(I will not use the GitHub archive mechanism such that everyone can still interact with the issue tracker.)*
-
-As it is easy to see, I am not really able to maintain this repo or help with the issues properly.
-
-I (still :P) don't have a Powerwall, and I also never ended up using the Homebridge ecosystem myself.
-
-Thanks to all the people that helped me in the past!
-Especially getting the mandatory authentication working somehow back then would not have been possible.
-
-I hope that this repo is still useful, but I don't plan on commiting any more code; feel free to fork the repo.
-The code in here was started pre ECMAScript 6, and some of the dependencies might be a bit weird.
-But it seems to have mostly done its job.
-
----
-
-
 # homebridge-tesla-powerwall
-[![npm](https://img.shields.io/npm/v/homebridge-tesla-powerwall.svg)](https://www.npmjs.com/package/homebridge-tesla-powerwall)
-[![npm](https://img.shields.io/npm/dt/homebridge-tesla-powerwall.svg)](https://www.npmjs.com/package/homebridge-tesla-powerwall)
 
-(Unofficial) Homebridge Plugin for the Tesla Powerwall.
+(Unofficial) Homebridge plugin for the Tesla Powerwall.
+
+## Maintained fork
+
+This fork maintains compatibility with Homebridge 2 while preserving the
+features and configuration of the original plugin. It includes updated HAP
+service and characteristic handling, compatibility support for Eve history,
+and safer handling of missing Powerwall API values.
+
+The project was originally created by Marvin Dostal
+([datMaffin](https://github.com/datMaffin)). This fork is maintained at
+[appleamiga/homebridge-tesla-powerwall](https://github.com/appleamiga/homebridge-tesla-powerwall).
 
 Communication with the Tesla Powerwall is according to https://github.com/vloschiavo/powerwall2 .
 
-This Plugin is considered to be complete.
-If you encounter a bug or want to propose a new feature, feel free to open an issue!
+If you encounter a bug or want to propose a new feature, open an issue in this
+fork's [issue tracker](https://github.com/appleamiga/homebridge-tesla-powerwall/issues).
 
 If you like this plugin, it is possible to donate a "cup of coffee" via Paypal:
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/HomebridgePowerwall)
 
 # Installation
-1. Install [Homebridge](https://github.com/homebridge/homebridge): see the [Homebridge wiki](https://github.com/homebridge/homebridge/wiki)
-2. In the Homebridge Web-GUI, search for the "Tesla Powerwall" plugin and install it.
-3. Adapt the `config.json` using the config view; add this plugin as a "platform" to your `config.json` file.
+1. Install [Homebridge](https://github.com/homebridge/homebridge); see the
+   [Homebridge wiki](https://github.com/homebridge/homebridge/wiki).
+2. Install the latest tagged release of this fork from GitHub. Run this in the
+   directory containing your Homebridge installation:
 
-#### Legacy Installation Instructions
-1. Install [Homebridge](https://github.com/homebridge/homebridge): `sudo npm install -g --unsafe-perm homebridge`
-2. Install this plugin `sudo npm install -g homebridge-tesla-powerwall`
-3. Add this plugin as a platform to your `config.json` file
+   ```sh
+   npm install "github:appleamiga/homebridge-tesla-powerwall#v3.1.1"
+   ```
+
+   For Homebridge Docker installations, run the command inside the container
+   and do not use the `--global` flag.
+3. Add the plugin as a `TeslaPowerwall` platform in `config.json`, or retain
+   your existing configuration when upgrading.
 
 ## Configuration
 Inside `config.json` of Homebridge:
